@@ -1,11 +1,16 @@
-const express = require("express");
-const app = express();
-const port = 3000;
+import { envs } from "./config/env/envs";
+import { Server } from "./app/server/server";
+import { AppRoutes } from "./app/routing/routes";
 
-app.get("/", (req: any, res: any) => {
-  res.send("Hello World!");
-});
+(async () => {
+  main();
+})();
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
-});
+function main() {
+  const server = new Server({
+    port: envs.PORT,
+    router: AppRoutes.routes(),
+  });
+
+  server.start();
+}
