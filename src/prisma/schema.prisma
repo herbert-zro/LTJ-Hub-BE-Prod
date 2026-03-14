@@ -1,0 +1,711 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../shared/infrastructure/database/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model eva_admin_permissions {
+  id              BigInt          @id @default(autoincrement()) @db.UnsignedBigInt
+  role_id         BigInt          @db.UnsignedBigInt
+  permission      String          @db.VarChar(255)
+  created_at      DateTime?       @db.Timestamp(0)
+  updated_at      DateTime?       @db.Timestamp(0)
+  eva_admin_roles eva_admin_roles @relation(fields: [role_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "eva_admin_permissions_role_id_foreign")
+
+  @@index([role_id], map: "eva_admin_permissions_role_id_foreign")
+}
+
+model eva_admin_roles {
+  id                    BigInt                  @id @default(autoincrement()) @db.UnsignedBigInt
+  name                  String                  @db.VarChar(100)
+  description           String?                 @db.VarChar(255)
+  created_at            DateTime?               @db.Timestamp(0)
+  updated_at            DateTime?               @db.Timestamp(0)
+  eva_admin_permissions eva_admin_permissions[]
+  eva_admin_users       eva_admin_users[]
+  eva_company_user      eva_company_user[]
+}
+
+model eva_admin_users {
+  id                      BigInt                    @id @default(autoincrement()) @db.UnsignedBigInt
+  name                    String                    @db.VarChar(255)
+  username                String?                   @db.VarChar(255)
+  email                   String                    @db.VarChar(255)
+  password                String                    @db.VarChar(255)
+  user_type               String                    @db.VarChar(25)
+  email_verified_at       DateTime?                 @db.Timestamp(0)
+  remember_token          String?                   @db.VarChar(100)
+  last_login              DateTime                  @db.DateTime(0)
+  status                  Boolean
+  created_at              DateTime?                 @db.Timestamp(0)
+  updated_at              DateTime?                 @db.Timestamp(0)
+  reset_password          Boolean
+  role_id                 BigInt?                   @db.UnsignedBigInt
+  eva_admin_roles         eva_admin_roles?          @relation(fields: [role_id], references: [id], onDelete: Cascade, map: "eva_admin_users_role_id_foreign")
+  eva_company_user        eva_company_user[]
+  eva_external_candidates eva_external_candidates[]
+  eva_logs                eva_logs[]
+
+  @@index([role_id], map: "eva_admin_users_role_id_foreign")
+}
+
+model eva_bot_plantilla {
+  id              BigInt         @id @default(autoincrement()) @db.UnsignedBigInt
+  idPlantilla     String         @db.VarChar(255)
+  bot_id          BigInt         @db.UnsignedBigInt
+  nombre          String         @db.VarChar(255)
+  parametros      String?        @db.VarChar(255)
+  status_template Boolean        @default(true)
+  type_template   String?        @db.VarChar(50)
+  created_at      DateTime?      @db.Timestamp(0)
+  updated_at      DateTime?      @db.Timestamp(0)
+  eva_config_bot  eva_config_bot @relation(fields: [bot_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "eva_bot_plantilla_bot_id_foreign")
+
+  @@index([bot_id], map: "eva_bot_plantilla_bot_id_foreign")
+}
+
+model eva_candidates {
+  id                      BigInt                    @id @default(autoincrement()) @db.UnsignedBigInt
+  firstname               String                    @db.VarChar(255)
+  lastname                String                    @db.VarChar(255)
+  username                String?                   @db.VarChar(255)
+  email                   String?                   @db.VarChar(255)
+  password                String                    @db.VarChar(255)
+  birthday                DateTime                  @db.Date
+  document                String                    @db.VarChar(255)
+  phone                   String                    @db.VarChar(25)
+  email_verified_at       DateTime?                 @db.Timestamp(0)
+  remember_token          String?                   @db.VarChar(100)
+  last_login              String?                   @db.VarChar(255)
+  status                  Boolean
+  status_register         Int                       @default(0) @db.TinyInt
+  type_register           Int                       @default(0) @db.TinyInt
+  created_at              DateTime?                 @db.Timestamp(0)
+  updated_at              DateTime?                 @db.Timestamp(0)
+  reset_password          Boolean
+  company_id              BigInt?                   @db.UnsignedBigInt
+  pais_id                 BigInt?                   @db.UnsignedBigInt
+  resume                  String?                   @db.VarChar(1000)
+  capacidad_intelectual   Int?
+  dominancia_normal       Int?
+  dominancia_ideal        Int?
+  dominancia_presion      Int?
+  influencia_normal       Int?
+  influencia_ideal        Int?
+  influencia_presion      Int?
+  estabilidad_normal      Int?
+  estabilidad_ideal       Int?
+  estabilidad_presion     Int?
+  cumplimiento_normal     Int?
+  cumplimiento_ideal      Int?
+  cumplimiento_presion    Int?
+  fecha_api               DateTime?                 @db.Date
+  fecha_inicio            DateTime?                 @db.DateTime(0)
+  fecha_finalizacion      DateTime?                 @db.DateTime(0)
+  eva_companies           eva_companies?            @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "eva_candidates_company_id_foreign")
+  eva_paises              eva_paises?               @relation(fields: [pais_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "eva_candidates_pais_id_foreign")
+  eva_external_candidates eva_external_candidates[]
+  eva_historial_envio_wa  eva_historial_envio_wa[]
+  eva_logs                eva_logs[]
+  eva_test_candidates     eva_test_candidates[]
+
+  @@index([company_id], map: "eva_candidates_company_id_foreign")
+  @@index([pais_id], map: "eva_candidates_pais_id_foreign")
+}
+
+model eva_catalogos_generales {
+  id            BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  tipo_catalogo String    @db.VarChar(255)
+  value         String    @db.VarChar(255)
+  text          String    @db.VarChar(10000)
+  activo        Boolean   @default(true)
+  created_at    DateTime? @db.Timestamp(0)
+  updated_at    DateTime? @db.Timestamp(0)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model eva_companies {
+  id                                    BigInt                                  @id @default(autoincrement()) @db.UnsignedBigInt
+  id_company                            String                                  @unique(map: "eva_companies_id_company_unique") @db.VarChar(255)
+  company_name                          String                                  @db.VarChar(255)
+  address                               String                                  @db.VarChar(255)
+  cellphone                             String                                  @db.VarChar(50)
+  email                                 String                                  @db.VarChar(500)
+  logo                                  String?                                 @db.VarChar(255)
+  status                                Boolean
+  created_at                            DateTime?                               @db.Timestamp(0)
+  updated_at                            DateTime?                               @db.Timestamp(0)
+  banner                                String?                                 @db.VarChar(255)
+  public_banner                         String?                                 @db.VarChar(255)
+  dashboard                             String?                                 @db.VarChar(255)
+  public_dashboard                      String?                                 @db.VarChar(255)
+  max_users                             Int                                     @default(3)
+  favicon                               String?                                 @db.VarChar(500)
+  pais_id                               BigInt                                  @default(54) @db.UnsignedBigInt
+  secciones_informe                     String?                                 @db.VarChar(255)
+  informes_selectivos                   String?                                 @db.VarChar(255)
+  evaluaciones_whatsapp                 Int                                     @default(0)
+  eva_candidates                        eva_candidates[]
+  eva_paises                            eva_paises                              @relation(fields: [pais_id], references: [id], onDelete: NoAction, map: "eva_companies_pais_id_foreign")
+  eva_company_evaluation                eva_company_evaluation[]
+  eva_company_settings                  eva_company_settings[]
+  eva_company_user                      eva_company_user[]
+  eva_email_template                    eva_email_template[]
+  eva_factores_rangos_personalizacion   eva_factores_rangos_personalizacion[]
+  eva_grupos_evaluaciones               eva_grupos_evaluaciones[]
+  eva_ponderaciones_percentiles_company eva_ponderaciones_percentiles_company[]
+
+  @@index([pais_id], map: "eva_companies_pais_id_foreign")
+}
+
+model eva_company_evaluation {
+  id               BigInt            @id @default(autoincrement()) @db.UnsignedBigInt
+  company_id       BigInt            @db.UnsignedBigInt
+  evaluation_id    BigInt?           @db.UnsignedBigInt
+  created_at       DateTime?         @db.Timestamp(0)
+  updated_at       DateTime?         @db.Timestamp(0)
+  eva_companies    eva_companies     @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "eva_company_evaluation_company_id_foreign")
+  eva_evaluaciones eva_evaluaciones? @relation(fields: [evaluation_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "eva_company_evaluation_evaluation_id_foreign")
+
+  @@index([company_id], map: "eva_company_evaluation_company_id_foreign")
+  @@index([evaluation_id], map: "eva_company_evaluation_evaluation_id_foreign")
+}
+
+model eva_company_settings {
+  id            BigInt        @id @default(autoincrement()) @db.UnsignedBigInt
+  name          String        @db.VarChar(255)
+  value         String        @db.LongText
+  company_id    BigInt        @db.UnsignedBigInt
+  created_at    DateTime?     @db.Timestamp(0)
+  updated_at    DateTime?     @db.Timestamp(0)
+  eva_companies eva_companies @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "eva_company_settings_company_id_foreign")
+
+  @@index([company_id], map: "eva_company_settings_company_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model eva_company_user {
+  my_row_id       BigInt           @id @db.UnsignedBigInt
+  company_id      BigInt           @db.UnsignedBigInt
+  user_id         BigInt           @db.UnsignedBigInt
+  role_id         BigInt?          @db.UnsignedBigInt
+  company_edit    Boolean          @default(false)
+  status          Boolean
+  created_at      DateTime?        @db.Timestamp(0)
+  updated_at      DateTime?        @db.Timestamp(0)
+  eva_companies   eva_companies    @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "eva_company_user_company_id_foreign")
+  eva_admin_users eva_admin_users  @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "eva_company_user_user_id_foreign")
+  eva_admin_roles eva_admin_roles? @relation(fields: [role_id], references: [id], onDelete: Restrict, map: "fk_eva_company_user_role")
+
+  @@index([company_id], map: "eva_company_user_company_id_foreign")
+  @@index([user_id], map: "eva_company_user_user_id_foreign")
+  @@index([role_id], map: "idx_eva_company_user_role_id")
+}
+
+model eva_config_bot {
+  id                BigInt              @id @default(autoincrement()) @db.UnsignedBigInt
+  idBotRedes        String              @db.VarChar(255)
+  nombre            String              @db.VarChar(255)
+  idEmpresa         String              @db.VarChar(255)
+  urlbot            String              @db.VarChar(255)
+  api_token         String              @unique(map: "eva_config_bot_api_token_unique") @db.VarChar(255)
+  ips               String?             @db.VarChar(255)
+  status            Boolean             @default(false)
+  created_at        DateTime?           @db.Timestamp(0)
+  updated_at        DateTime?           @db.Timestamp(0)
+  eva_bot_plantilla eva_bot_plantilla[]
+}
+
+model eva_departamentos {
+  id         BigInt      @id @default(autoincrement()) @db.UnsignedBigInt
+  pais       String      @db.VarChar(255)
+  tipo       String      @db.VarChar(255)
+  id_pais    BigInt?     @db.UnsignedBigInt
+  nombre     String      @db.VarChar(255)
+  created_at DateTime?   @db.Timestamp(0)
+  updated_at DateTime?   @db.Timestamp(0)
+  eva_paises eva_paises? @relation(fields: [id_pais], references: [id], onUpdate: NoAction, map: "eva_departamentos_id_pais_foreign")
+
+  @@index([id_pais], map: "eva_departamentos_id_pais_foreign")
+}
+
+model eva_email_template {
+  id             BigInt          @id @default(autoincrement()) @db.UnsignedBigInt
+  status         Boolean
+  template       String          @db.LongText
+  subject        String          @db.Text
+  company_id     BigInt?         @db.UnsignedBigInt
+  created_at     DateTime?       @db.Timestamp(0)
+  updated_at     DateTime?       @db.Timestamp(0)
+  deleted_at     DateTime?       @db.Timestamp(0)
+  type_id        BigInt?         @db.UnsignedBigInt
+  eva_companies  eva_companies?  @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "eva_email_template_company_id_foreign")
+  eva_email_type eva_email_type? @relation(fields: [type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "eva_email_template_type_id_foreign")
+
+  @@index([company_id], map: "eva_email_template_company_id_foreign")
+  @@index([type_id], map: "eva_email_template_type_id_foreign")
+}
+
+model eva_email_type {
+  id                 BigInt               @id @default(autoincrement()) @db.UnsignedBigInt
+  name               String               @db.VarChar(255)
+  created_at         DateTime?            @db.Timestamp(0)
+  updated_at         DateTime?            @db.Timestamp(0)
+  deleted_at         DateTime?            @db.Timestamp(0)
+  eva_email_template eva_email_template[]
+}
+
+model eva_evaluaciones {
+  id                                  BigInt                                @id @default(autoincrement()) @db.UnsignedBigInt
+  id_test                             Int
+  nombre                              String                                @db.VarChar(255)
+  activo                              Boolean
+  id_evaluacion_tipo                  BigInt
+  id_evaluacion_factor                BigInt?
+  created_at                          DateTime?                             @db.Timestamp(0)
+  updated_at                          DateTime?                             @db.Timestamp(0)
+  eva_company_evaluation              eva_company_evaluation[]
+  eva_external_candidates_evaluations eva_external_candidates_evaluations[]
+  eva_rango_percentiles               eva_rango_percentiles[]
+  eva_test_candidates                 eva_test_candidates[]
+  eva_test_preguntas                  eva_test_preguntas[]
+}
+
+model eva_evaluaciones_factores {
+  id                                    BigInt                                  @id @default(autoincrement()) @db.UnsignedBigInt
+  nombre                                String                                  @db.VarChar(50)
+  referencia_api                        String                                  @db.VarChar(255)
+  abreviatura                           String?                                 @db.VarChar(5)
+  id_evaluacion_tipo                    BigInt?                                 @db.UnsignedBigInt
+  created_at                            DateTime?                               @db.Timestamp(0)
+  updated_at                            DateTime?                               @db.Timestamp(0)
+  default_value                         String?                                 @db.VarChar(255)
+  eva_evaluaciones_tipos                eva_evaluaciones_tipos?                 @relation(fields: [id_evaluacion_tipo], references: [id], onDelete: Cascade, map: "eva_evaluaciones_factores_id_evaluacion_tipo_foreign")
+  eva_evaluaciones_factores_rangos      eva_evaluaciones_factores_rangos[]
+  eva_percentil_respuestas              eva_percentil_respuestas[]
+  eva_ponderaciones_percentiles_company eva_ponderaciones_percentiles_company[]
+  eva_rango_percentiles                 eva_rango_percentiles[]
+
+  @@index([id_evaluacion_tipo], map: "eva_evaluaciones_factores_id_evaluacion_tipo_foreign")
+}
+
+model eva_evaluaciones_factores_rangos {
+  id                                  BigInt                                @id @default(autoincrement()) @db.UnsignedBigInt
+  percentil_min                       Float?
+  percentil_max                       Float?
+  estado                              String                                @db.VarChar(50)
+  descripcion                         String                                @db.VarChar(5000)
+  id_evaluacion_factor                BigInt?                               @db.UnsignedBigInt
+  created_at                          DateTime?                             @db.Timestamp(0)
+  updated_at                          DateTime?                             @db.Timestamp(0)
+  eva_evaluaciones_factores           eva_evaluaciones_factores?            @relation(fields: [id_evaluacion_factor], references: [id], onDelete: Cascade, map: "eva_evaluaciones_factores_rangos_id_evaluacion_factor_foreign")
+  eva_factores_rangos_personalizacion eva_factores_rangos_personalizacion[]
+
+  @@index([id_evaluacion_factor], map: "eva_evaluaciones_factores_rangos_id_evaluacion_factor_foreign")
+}
+
+model eva_evaluaciones_tipos {
+  id                        BigInt                      @id @default(autoincrement()) @db.UnsignedBigInt
+  nombre                    String                      @db.VarChar(50)
+  created_at                DateTime?                   @db.Timestamp(0)
+  updated_at                DateTime?                   @db.Timestamp(0)
+  eva_evaluaciones_factores eva_evaluaciones_factores[]
+}
+
+model eva_evaluation_result {
+  id                     BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  evaluation_id          BigInt    @db.UnsignedBigInt
+  external_evaluation_id BigInt    @db.UnsignedBigInt
+  evaluacion_factor_id   BigInt    @db.UnsignedBigInt
+  result                 Int?
+  result_normal          Int?
+  result_ideal           Int?
+  result_presion         Int?
+  created_at             DateTime? @db.Timestamp(0)
+  updated_at             DateTime? @db.Timestamp(0)
+}
+
+model eva_external_candidates {
+  id                                  BigInt                                @id @default(autoincrement()) @db.UnsignedBigInt
+  id_proceso                          BigInt?                               @db.UnsignedBigInt
+  id_candidate                        BigInt?                               @db.UnsignedBigInt
+  firstname                           String                                @db.VarChar(255)
+  lastname                            String                                @db.VarChar(255)
+  email                               String?                               @db.VarChar(255)
+  observations                        String?                               @db.VarChar(255)
+  json_respons                        String?                               @db.Text
+  id_user_create                      BigInt?                               @db.UnsignedBigInt
+  created_at                          DateTime?                             @db.Timestamp(0)
+  updated_at                          DateTime?                             @db.Timestamp(0)
+  eva_candidates                      eva_candidates?                       @relation(fields: [id_candidate], references: [id], onUpdate: NoAction, map: "eva_external_candidates_id_candidate_foreign")
+  eva_admin_users                     eva_admin_users?                      @relation(fields: [id_user_create], references: [id], onUpdate: NoAction, map: "eva_external_candidates_id_user_create_foreign")
+  eva_external_candidates_evaluations eva_external_candidates_evaluations[]
+  eva_historial_envio_wa              eva_historial_envio_wa[]
+
+  @@index([id_candidate], map: "eva_external_candidates_id_candidate_foreign")
+  @@index([id_user_create], map: "eva_external_candidates_id_user_create_index")
+}
+
+model eva_external_candidates_evaluations {
+  id                      BigInt                                            @id @default(autoincrement()) @db.UnsignedBigInt
+  id_candidate            BigInt?                                           @db.UnsignedBigInt
+  id_evaluation           BigInt?                                           @db.UnsignedBigInt
+  link                    String?                                           @db.VarChar(255)
+  generation_date         DateTime?                                         @db.DateTime(0)
+  due_date                DateTime?                                         @db.DateTime(0)
+  status                  String?                                           @db.VarChar(255)
+  created_at              DateTime?                                         @db.Timestamp(0)
+  updated_at              DateTime?                                         @db.Timestamp(0)
+  datos_procesados        Int?
+  tipo_registro           eva_external_candidates_evaluations_tipo_registro @default(EMAIL)
+  ci_result               Int?
+  id_test_ci              Int?
+  id_test_disc            Int?
+  eva_external_candidates eva_external_candidates?                          @relation(fields: [id_candidate], references: [id], onUpdate: NoAction, map: "eva_external_candidates_evaluations_id_candidate_foreign")
+  eva_evaluaciones        eva_evaluaciones?                                 @relation(fields: [id_evaluation], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "eva_external_candidates_evaluations_id_evaluation_foreign")
+
+  @@index([id_candidate], map: "eva_external_candidates_evaluations_id_candidate_foreign")
+  @@index([id_evaluation], map: "eva_external_candidates_evaluations_id_evaluation_foreign")
+}
+
+model eva_factores_rangos_personalizacion {
+  id                               BigInt                           @id @default(autoincrement()) @db.UnsignedBigInt
+  factor_rango_id                  BigInt                           @db.UnsignedBigInt
+  estado                           String                           @db.VarChar(50)
+  descripcion                      String                           @db.VarChar(5000)
+  company_id                       BigInt                           @db.UnsignedBigInt
+  created_at                       DateTime?                        @db.Timestamp(0)
+  updated_at                       DateTime?                        @db.Timestamp(0)
+  eva_companies                    eva_companies                    @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "eva_factores_rangos_personalizacion_company_id_foreign")
+  eva_evaluaciones_factores_rangos eva_evaluaciones_factores_rangos @relation(fields: [factor_rango_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "eva_factores_rangos_personalizacion_factor_rango_id_foreign")
+
+  @@index([company_id], map: "eva_factores_rangos_personalizacion_company_id_foreign")
+  @@index([factor_rango_id], map: "eva_factores_rangos_personalizacion_factor_rango_id_foreign")
+}
+
+model eva_failed_jobs {
+  id         BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  uuid       String   @unique(map: "eva_failed_jobs_uuid_unique") @db.VarChar(255)
+  connection String   @db.Text
+  queue      String   @db.Text
+  payload    String   @db.LongText
+  exception  String   @db.LongText
+  failed_at  DateTime @default(now()) @db.Timestamp(0)
+}
+
+model eva_grupos {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  name       String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model eva_grupos_evaluaciones {
+  id            BigInt         @id @default(autoincrement()) @db.UnsignedBigInt
+  name          String         @db.VarChar(255)
+  created_at    DateTime?      @db.Timestamp(0)
+  updated_at    DateTime?      @db.Timestamp(0)
+  company_id    BigInt?        @db.UnsignedBigInt
+  eva_companies eva_companies? @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "eva_grupos_evaluaciones_company_id_foreign")
+  eva_procesos  eva_procesos[]
+
+  @@index([company_id], map: "eva_grupos_evaluaciones_company_id_foreign")
+}
+
+model eva_historial_envio_wa {
+  id                      BigInt                  @id @default(autoincrement()) @db.UnsignedBigInt
+  candidate_id            BigInt                  @db.UnsignedBigInt
+  external_candidate_id   BigInt                  @db.UnsignedBigInt
+  proceso_id              BigInt                  @db.UnsignedBigInt
+  tipo                    String                  @db.VarChar(50)
+  status                  String                  @db.VarChar(50)
+  created_at              DateTime?               @db.Timestamp(0)
+  updated_at              DateTime?               @db.Timestamp(0)
+  eva_candidates          eva_candidates          @relation(fields: [candidate_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "eva_historial_envio_wa_candidate_id_foreign")
+  eva_external_candidates eva_external_candidates @relation(fields: [external_candidate_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "eva_historial_envio_wa_external_candidate_id_foreign")
+  eva_procesos            eva_procesos            @relation(fields: [proceso_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "eva_historial_envio_wa_proceso_id_foreign")
+
+  @@index([candidate_id], map: "eva_historial_envio_wa_candidate_id_foreign")
+  @@index([external_candidate_id], map: "eva_historial_envio_wa_external_candidate_id_foreign")
+  @@index([proceso_id], map: "eva_historial_envio_wa_proceso_id_foreign")
+}
+
+model eva_informes {
+  informe_id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  informe_nombre      String    @db.VarChar(255)
+  catalogo_general_id String?   @db.VarChar(255)
+  created_at          DateTime? @db.Timestamp(0)
+  updated_at          DateTime? @db.Timestamp(0)
+}
+
+model eva_jobs {
+  id           BigInt @id @default(autoincrement()) @db.UnsignedBigInt
+  queue        String @db.VarChar(255)
+  payload      String @db.LongText
+  attempts     Int    @db.UnsignedTinyInt
+  reserved_at  Int?   @db.UnsignedInt
+  available_at Int    @db.UnsignedInt
+  created_at   Int    @db.UnsignedInt
+
+  @@index([queue], map: "eva_jobs_queue_index")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model eva_logs {
+  id              BigInt           @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id         BigInt?          @db.UnsignedBigInt
+  table_name      String           @db.VarChar(255)
+  action          Int
+  created_at      DateTime?        @db.Timestamp(0)
+  updated_at      DateTime?        @db.Timestamp(0)
+  record_id       Int?
+  candidate_id    BigInt?          @db.UnsignedBigInt
+  eva_candidates  eva_candidates?  @relation(fields: [candidate_id], references: [id], onUpdate: NoAction, map: "eva_logs_candidate_id_foreign")
+  eva_admin_users eva_admin_users? @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "eva_logs_user_id_foreign")
+
+  @@index([candidate_id], map: "eva_logs_candidate_id_foreign")
+  @@index([user_id], map: "eva_logs_user_id_foreign")
+}
+
+model eva_migrations {
+  id        Int    @id @default(autoincrement()) @db.UnsignedInt
+  migration String @db.VarChar(255)
+  batch     Int
+}
+
+model eva_municipios {
+  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  muni_id     String    @db.VarChar(255)
+  muni_nombre String    @db.VarChar(255)
+  depa_id     String    @db.VarChar(255)
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+}
+
+model eva_opciones {
+  opcion_id             BigInt                  @id @default(autoincrement()) @db.UnsignedBigInt
+  opcion_nombre         String                  @db.VarChar(255)
+  created_at            DateTime?               @db.Timestamp(0)
+  updated_at            DateTime?               @db.Timestamp(0)
+  eva_pregunta_opciones eva_pregunta_opciones[]
+}
+
+model eva_paises {
+  id                BigInt              @id @default(autoincrement()) @db.UnsignedBigInt
+  nombre            String              @db.VarChar(255)
+  codigo_telefono   String?             @db.VarChar(10)
+  api_evaluaciones  Boolean             @default(false)
+  created_at        DateTime?           @db.Timestamp(0)
+  updated_at        DateTime?           @db.Timestamp(0)
+  eva_candidates    eva_candidates[]
+  eva_companies     eva_companies[]
+  eva_departamentos eva_departamentos[]
+  eva_procesos      eva_procesos[]
+}
+
+model eva_percentil_respuestas {
+  percentilespuesta_id      BigInt                    @id @default(autoincrement()) @db.UnsignedBigInt
+  pregunta_id               BigInt                    @db.UnsignedBigInt
+  porcentil_id              BigInt                    @db.UnsignedBigInt
+  opcion_id                 String                    @db.VarChar(20)
+  respuesta_ponderacion     Int
+  created_at                DateTime?                 @db.Timestamp(0)
+  updated_at                DateTime?                 @db.Timestamp(0)
+  eva_evaluaciones_factores eva_evaluaciones_factores @relation(fields: [porcentil_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "eva_percentil_respuestas_porcentil_id_foreign")
+  eva_preguntas             eva_preguntas             @relation(fields: [pregunta_id], references: [pregunta_id], onDelete: Cascade, onUpdate: NoAction, map: "eva_percentil_respuestas_pregunta_id_foreign")
+
+  @@index([porcentil_id], map: "eva_percentil_respuestas_porcentil_id_foreign")
+  @@index([pregunta_id], map: "eva_percentil_respuestas_pregunta_id_foreign")
+}
+
+model eva_percentiles_valores {
+  id                              BigInt                            @id @default(autoincrement()) @db.UnsignedBigInt
+  rango_percentil_id              BigInt                            @db.UnsignedBigInt
+  percentil                       Int
+  created_at                      DateTime?                         @db.Timestamp(0)
+  updated_at                      DateTime?                         @db.Timestamp(0)
+  eva_rango_percentiles           eva_rango_percentiles             @relation(fields: [rango_percentil_id], references: [rangopercentiles_id], onDelete: Cascade, onUpdate: NoAction, map: "eva_percentiles_valores_rango_percentil_id_foreign")
+  eva_percentiles_valores_detalle eva_percentiles_valores_detalle[]
+
+  @@unique([rango_percentil_id, percentil], map: "eva_percentiles_valores_rango_percentil_id_percentil_unique")
+}
+
+model eva_percentiles_valores_detalle {
+  id                         BigInt                     @id @default(autoincrement()) @db.UnsignedBigInt
+  percentil_valor_id         BigInt                     @db.UnsignedBigInt
+  tipo_valor_dimension_id    BigInt                     @db.UnsignedBigInt
+  valor                      Int
+  created_at                 DateTime?                  @db.Timestamp(0)
+  updated_at                 DateTime?                  @db.Timestamp(0)
+  eva_percentiles_valores    eva_percentiles_valores    @relation(fields: [percentil_valor_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "eva_percentiles_valores_detalle_percentil_valor_id_foreign")
+  eva_tipo_valores_dimension eva_tipo_valores_dimension @relation(fields: [tipo_valor_dimension_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "eva_percentiles_valores_detalle_tipo_valor_dimension_id_foreign")
+
+  @@index([percentil_valor_id], map: "eva_percentiles_valores_detalle_percentil_valor_id_foreign")
+  @@index([tipo_valor_dimension_id], map: "eva_percentiles_valores_detalle_tipo_valor_dimension_id_foreign")
+}
+
+model eva_ponderaciones_percentiles_company {
+  id                        BigInt                    @id @default(autoincrement()) @db.UnsignedBigInt
+  ponderacion_percentil     Decimal                   @db.Decimal(10, 2)
+  company_id                BigInt                    @db.UnsignedBigInt
+  percentil_id              BigInt                    @db.UnsignedBigInt
+  created_at                DateTime?                 @db.Timestamp(0)
+  updated_at                DateTime?                 @db.Timestamp(0)
+  eva_companies             eva_companies             @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "eva_ponderaciones_percentiles_company_company_id_foreign")
+  eva_evaluaciones_factores eva_evaluaciones_factores @relation(fields: [percentil_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "eva_ponderaciones_percentiles_company_percentil_id_foreign")
+
+  @@index([company_id], map: "eva_ponderaciones_percentiles_company_company_id_foreign")
+  @@index([percentil_id], map: "eva_ponderaciones_percentiles_company_percentil_id_foreign")
+}
+
+model eva_pregunta_opciones {
+  preguntaopcion_id BigInt        @id @default(autoincrement()) @db.UnsignedBigInt
+  pregunta_id       BigInt        @db.UnsignedBigInt
+  opcion_id         BigInt        @db.UnsignedBigInt
+  created_at        DateTime?     @db.Timestamp(0)
+  updated_at        DateTime?     @db.Timestamp(0)
+  eva_opciones      eva_opciones  @relation(fields: [opcion_id], references: [opcion_id], onDelete: Cascade, onUpdate: NoAction, map: "eva_pregunta_opciones_opcion_id_foreign")
+  eva_preguntas     eva_preguntas @relation(fields: [pregunta_id], references: [pregunta_id], onDelete: Cascade, onUpdate: NoAction, map: "eva_pregunta_opciones_pregunta_id_foreign")
+
+  @@index([opcion_id], map: "eva_pregunta_opciones_opcion_id_foreign")
+  @@index([pregunta_id], map: "eva_pregunta_opciones_pregunta_id_foreign")
+}
+
+model eva_preguntas {
+  pregunta_id              BigInt                     @id @default(autoincrement()) @db.UnsignedBigInt
+  codigo                   String?                    @unique(map: "eva_preguntas_codigo_unique") @db.VarChar(50)
+  pregunta_nombre          String                     @db.VarChar(255)
+  tipopregunta_id          BigInt                     @db.UnsignedBigInt
+  pregunta_estado          Int                        @default(1)
+  created_at               DateTime?                  @db.Timestamp(0)
+  updated_at               DateTime?                  @db.Timestamp(0)
+  eva_percentil_respuestas eva_percentil_respuestas[]
+  eva_pregunta_opciones    eva_pregunta_opciones[]
+  eva_tipo_preguntas       eva_tipo_preguntas         @relation(fields: [tipopregunta_id], references: [tipopregunta_id], onDelete: Cascade, onUpdate: NoAction, map: "eva_preguntas_tipopregunta_id_foreign")
+  eva_test_preguntas       eva_test_preguntas[]
+  eva_test_respuestas      eva_test_respuestas[]
+
+  @@index([tipopregunta_id], map: "eva_preguntas_tipopregunta_id_foreign")
+}
+
+model eva_procesos {
+  id                      BigInt                       @id @default(autoincrement()) @db.UnsignedBigInt
+  nombre                  String                       @db.VarChar(500)
+  fecha_cierre            DateTime?                    @db.Date
+  id_pais                 BigInt?                      @db.UnsignedBigInt
+  status                  eva_procesos_status          @default(CREADO)
+  id_user_create          BigInt?                      @db.UnsignedBigInt
+  created_at              DateTime?                    @db.Timestamp(0)
+  updated_at              DateTime?                    @db.Timestamp(0)
+  group_id                BigInt?                      @db.UnsignedBigInt
+  id_user_asigned         BigInt?                      @db.UnsignedBigInt
+  required_resume         eva_procesos_required_resume @default(No)
+  eva_historial_envio_wa  eva_historial_envio_wa[]
+  eva_grupos_evaluaciones eva_grupos_evaluaciones?     @relation(fields: [group_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "eva_procesos_group_id_foreign")
+  eva_paises              eva_paises?                  @relation(fields: [id_pais], references: [id], onDelete: NoAction, map: "eva_procesos_id_pais_foreign")
+
+  @@index([group_id], map: "eva_procesos_group_id_foreign")
+  @@index([id_pais], map: "eva_procesos_id_pais_foreign")
+}
+
+model eva_rango_percentiles {
+  rangopercentiles_id       BigInt                    @id @default(autoincrement()) @db.UnsignedBigInt
+  evaluacion_id             BigInt?                   @db.UnsignedBigInt
+  percentil_id              BigInt                    @db.UnsignedBigInt
+  puntuacion                Int
+  resultado                 Int
+  created_at                DateTime?                 @db.Timestamp(0)
+  updated_at                DateTime?                 @db.Timestamp(0)
+  eva_percentiles_valores   eva_percentiles_valores[]
+  eva_evaluaciones          eva_evaluaciones?         @relation(fields: [evaluacion_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "eva_rango_percentiles_evaluacion_id_foreign")
+  eva_evaluaciones_factores eva_evaluaciones_factores @relation(fields: [percentil_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "eva_rango_percentiles_percentil_id_foreign")
+
+  @@index([evaluacion_id], map: "eva_rango_percentiles_evaluacion_id_foreign")
+  @@index([percentil_id], map: "eva_rango_percentiles_percentil_id_foreign")
+}
+
+model eva_settings {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  name       String    @db.VarChar(255)
+  value      String    @db.LongText
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model eva_test_candidates {
+  testcandidate_id    BigInt                @id @default(autoincrement()) @db.UnsignedBigInt
+  test_id             BigInt                @db.UnsignedBigInt
+  candidate_id        BigInt                @db.UnsignedBigInt
+  testcandidate_fecha DateTime              @db.DateTime(0)
+  created_at          DateTime?             @db.Timestamp(0)
+  updated_at          DateTime?             @db.Timestamp(0)
+  eva_candidates      eva_candidates        @relation(fields: [candidate_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "eva_test_candidates_candidate_id_foreign")
+  eva_evaluaciones    eva_evaluaciones      @relation(fields: [test_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "eva_test_candidates_test_id_foreign")
+  eva_test_respuestas eva_test_respuestas[]
+
+  @@index([candidate_id], map: "eva_test_candidates_candidate_id_foreign")
+  @@index([test_id], map: "eva_test_candidates_test_id_foreign")
+}
+
+model eva_test_preguntas {
+  testpregunta_id  BigInt           @id @default(autoincrement()) @db.UnsignedBigInt
+  test_id          BigInt           @db.UnsignedBigInt
+  pregunta_id      BigInt           @db.UnsignedBigInt
+  created_at       DateTime?        @db.Timestamp(0)
+  updated_at       DateTime?        @db.Timestamp(0)
+  eva_preguntas    eva_preguntas    @relation(fields: [pregunta_id], references: [pregunta_id], onDelete: Cascade, onUpdate: NoAction, map: "eva_test_preguntas_pregunta_id_foreign")
+  eva_evaluaciones eva_evaluaciones @relation(fields: [test_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "eva_test_preguntas_test_id_foreign")
+
+  @@index([pregunta_id], map: "eva_test_preguntas_pregunta_id_foreign")
+  @@index([test_id], map: "eva_test_preguntas_test_id_foreign")
+}
+
+model eva_test_respuestas {
+  testrespuesta_id    BigInt              @id @default(autoincrement()) @db.UnsignedBigInt
+  testcandidate_id    BigInt              @db.UnsignedBigInt
+  pregunta_id         BigInt              @db.UnsignedBigInt
+  test_respuesta      String              @db.VarChar(50)
+  created_at          DateTime?           @db.Timestamp(0)
+  updated_at          DateTime?           @db.Timestamp(0)
+  eva_preguntas       eva_preguntas       @relation(fields: [pregunta_id], references: [pregunta_id], onDelete: Cascade, onUpdate: NoAction, map: "eva_test_respuestas_pregunta_id_foreign")
+  eva_test_candidates eva_test_candidates @relation(fields: [testcandidate_id], references: [testcandidate_id], onDelete: Cascade, onUpdate: NoAction, map: "eva_test_respuestas_testcandidate_id_foreign")
+
+  @@index([pregunta_id], map: "eva_test_respuestas_pregunta_id_foreign")
+  @@index([testcandidate_id], map: "eva_test_respuestas_testcandidate_id_foreign")
+}
+
+model eva_tipo_preguntas {
+  tipopregunta_id     BigInt          @id @default(autoincrement()) @db.UnsignedBigInt
+  tipopregunta_nombre String          @db.VarChar(255)
+  created_at          DateTime?       @db.Timestamp(0)
+  updated_at          DateTime?       @db.Timestamp(0)
+  eva_preguntas       eva_preguntas[]
+}
+
+model eva_tipo_valores_dimension {
+  id                              BigInt                            @id @default(autoincrement()) @db.UnsignedBigInt
+  nombre                          String                            @unique(map: "eva_tipo_valores_dimension_nombre_unique") @db.VarChar(255)
+  created_at                      DateTime?                         @db.Timestamp(0)
+  updated_at                      DateTime?                         @db.Timestamp(0)
+  eva_percentiles_valores_detalle eva_percentiles_valores_detalle[]
+}
+
+enum eva_procesos_status {
+  CREADO
+  PAUSADO
+  CERRADO
+}
+
+enum eva_external_candidates_evaluations_tipo_registro {
+  EMAIL
+  WHATSAPP
+  EMAIL_WHATSAPP @map("EMAIL/WHATSAPP")
+}
+
+enum eva_procesos_required_resume {
+  Yes
+  No
+}
